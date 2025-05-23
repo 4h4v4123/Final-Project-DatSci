@@ -7,7 +7,7 @@ import pickle
 from sklearn.preprocessing import MinMaxScaler
 
 # Load the model
-model = load_model('lstm_model_raw.h5')
+model = load_model('lstm_model_raw.keras')
 
 # Load the scaler
 with open('scaler_raw.pkl', 'rb') as f:
