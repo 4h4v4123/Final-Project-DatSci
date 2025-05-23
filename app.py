@@ -7,14 +7,14 @@ import pickle
 from sklearn.preprocessing import MinMaxScaler
 
 # Load the model
-model = load_model('C:/Users/Administrator/PycharmProjects/Final Project/Model/lstm_model_raw.h5')
+model = load_model('lstm_model_raw.h5')
 
 # Load the scaler
-with open('C:/Users/Administrator/PycharmProjects/Final Project/scaler_raw.pkl', 'rb') as f:
+with open('scaler_raw.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
 # Load the dataset
-df = pd.read_csv('C:/Users/Administrator/PycharmProjects/Final Project/Market_cleaned_NYA.csv', parse_dates=['Date'], index_col='Date')
+df = pd.read_csv('Market_cleaned_NYA.csv', parse_dates=['Date'], index_col='Date')
 
 # Page title
 st.title("LSTM Stock Price NYA Predictor")
