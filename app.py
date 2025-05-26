@@ -7,7 +7,7 @@ import pickle
 
 @st.cache_resource
 def load_model_once():
-    return load_model('C:/Users/Administrator/PycharmProjects/Final Project/tuned_lstm_model.h5')
+    return load_model('tuned_lstm_model.h5')
 
 @st.cache_data
 def load_scalers():
@@ -19,7 +19,7 @@ def load_scalers():
 
 @st.cache_data
 def load_data():
-    return pd.read_csv('C:/Users/Administrator/PycharmProjects/Final Project/Market_cleaned_NYA.csv', parse_dates=['Date'], index_col='Date')
+    return pd.read_csv('Market_cleaned_NYA.csv', parse_dates=['Date'], index_col='Date')
 
 # Load resources
 model = load_model_once()
