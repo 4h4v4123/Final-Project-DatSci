@@ -7,7 +7,7 @@ import pickle
 
 @st.cache_resource
 def load_model_once():
-    return load_model('tuned_lstm_model.h5')
+    return load_model('tuned_lstm_model.keras')
 
 @st.cache_data
 def load_scalers():
