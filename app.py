@@ -11,9 +11,9 @@ def load_model_once():
 
 @st.cache_data
 def load_scalers():
-    with open('scaler_X.pkl', 'rb') as f:
+    with open('tuned_lstm_scaler_X.pkl', 'rb') as f:
         scaler_X = pickle.load(f)
-    with open('scaler_y.pkl', 'rb') as f:
+    with open('tuned_lstm_scaler_y.pkl', 'rb') as f:
         scaler_y = pickle.load(f)
     return scaler_X, scaler_y
 
