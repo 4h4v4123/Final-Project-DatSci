@@ -37,6 +37,10 @@ with st.sidebar:
 st.title("📊 SARIMAX Forecasting App - Nikkei 225 (N225)")
 st.markdown("Forecasting **High** prices using SARIMAX with **Open** values as exogenous input.")
 
+st.subheader("📋 Preview of Uploaded Data")
+st.write(df.head())
+st.write(df.tail())
+
 # FORECAST PREP
 future_exog = df["Open"].iloc[-forecast_steps:]
 future_exog_df = pd.DataFrame({"Open": future_exog})
