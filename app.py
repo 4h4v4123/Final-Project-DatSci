@@ -8,18 +8,11 @@ import tensorflow as tf
 # --- Load model and scaler ---
 @st.cache_resource
 def load_model_and_scaler():
-    model = tf.keras.models.load_model("untuned_lstm_model.h5")
-    scaler = joblib.load("untuned_lstm_model_scaler.pkl")
+    model = tf.keras.models.load_model("C:/Users/Administrator/PycharmProjects/Final Project/untuned_lstm_model.keras")
+    scaler = joblib.load("C:/Users/Administrator/PycharmProjects/Final Project/untuned_lstm_model_scaler.pkl")
     return model, scaler
 
 model, scaler = load_model_and_scaler()
-
-st.markdown("### 🚀 Forecast Dashboard")
-
-col1, col2, col3 = st.columns(3)
-col1.metric("MAE", f"{mae:.4f}")
-col2.metric("RMSE", f"{rmse:.4f}")
-col3.metric("Forecast Horizon", f"{forecast_horizon} days")
 
 # --- Streamlit UI --- #
 st.title("📈 Market Data LSTM Forecasting")
@@ -28,10 +21,6 @@ st.write("Upload market data (CSV) to forecast using a pre-trained LSTM model.")
 # --- Sidebar UI ---
 features = ['Open', 'High', 'Low', 'Adj Close', 'Volume']
 output_options = ['Adj Close', 'Close', 'Open', 'High', 'Low', 'Volume']
-
-if st.sidebar.checkbox("🧠 Show Model Info"):
-    st.subheader("Model Architecture")
-    model.summary(print_fn=lambda x: st.text(x))
 
 # --- Sidebar for manual input ---
 st.sidebar.header("🔢 Manual Input for Prediction")
@@ -64,101 +53,42 @@ if st.sidebar.button("Predict Next Day Value"):
     ax.legend()
     st.pyplot(fig)
 
+# --- Upload CSV ---
+uploaded_file = st.file_uploader("Upload your market data CSV", type=["csv"])
 
-df = pd.read_csv('Market_cleaned_NYA.csv')
-st.subheader("📋 Preview of Uploaded Data")
-st.write(df.head())
-st.write(df.tail())
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+    st.subheader("📋 Preview of Uploaded Data")
+    st.write(df.head())
+    st.write(df.tail())
 
-# --- Select and scale features ---
-features = ['Open', 'High', 'Low', 'Adj Close', 'Volume']
-if not all(col in df.columns for col in features):
-    st.error(f"CSV must include these columns: {features}")
-else:
-    df_features = df[features]
-    scaled_data = scaler.transform(df_features)
+    # --- Select and scale features ---
+    features = ['Open', 'High', 'Low', 'Adj Close', 'Volume']
+    if not all(col in df.columns for col in features):
+        st.error(f"CSV must include these columns: {features}")
+    else:
+        df_features = df[features]
+        scaled_data = scaler.transform(df_features)
 
-# --- Create sequences ---
-sequence_length = 60
-X = []
-for i in range(sequence_length, len(scaled_data)):
-    X.append(scaled_data[i - sequence_length:i])
-X = np.array(X)
-    
-st.success(f"✅ Created {X.shape[0]} sequences for prediction.")
+        # --- Create sequences ---
+        sequence_length = 60
+        X = []
+        for i in range(sequence_length, len(scaled_data)):
+            X.append(scaled_data[i - sequence_length:i])
+        X = np.array(X)
 
-# Manual Input Prediction Plot (after st.success() on prediction)
-fig2 = go.Figure()
+        st.success(f"✅ Created {X.shape[0]} sequences for prediction.")
 
-# User input points
-fig2.add_trace(go.Scatter(
-    x=list(range(1,6)),
-    y=user_input_np[:, output_options.index(selected_output)],
-    mode='lines+markers',
-    name='Input History'
-))
+        # --- Make predictions ---
+        predictions = model.predict(X)
 
-# Predicted point
-fig2.add_trace(go.Scatter(
-    x=[6],
-    y=[prediction[0][0]],
-    mode='markers',
-    marker=dict(size=12, color='red'),
-    name='Predicted Next Value'
-))
+        # --- Visualize predictions ---
+        st.subheader("📊 Predicted vs Actual")
+        actual = scaled_data[sequence_length:, 3]  # Actual 'Adj Close' column after seq offset
+        pred = predictions.flatten()
 
-fig2.update_layout(
-    title=f"📊 {selected_output} - Last 5 Days & Prediction",
-    xaxis_title="Day",
-    yaxis_title=selected_output,
-    template="plotly_dark"
-)
-
-st.plotly_chart(fig2, use_container_width=True)
-
-# --- Make predictions ---
-predictions = model.predict(X)
-
-import plotly.graph_objs as go
-
-# Get actual and predicted values (scale back if needed)
-actual = scaled_data[sequence_length:, 3] 
-pred = predictions.flatten()
-
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-
-# Inverse transform predictions and actuals if necessary (depends on your model setup)
-# Assuming they are scaled, so let's just use them directly here
-mae = mean_absolute_error(actual, pred)
-rmse = np.sqrt(mean_squared_error(actual, pred))
-mape = np.mean(np.abs((actual - pred) / actual)) * 100
-r2 = r2_score(actual, pred) * 100
-
-st.info(f"📊 **Model Evaluation Metrics:**\n- MAE: {mae:.4f}\n- RMSE: {rmse:.4f}\n- MAPE: {mape:.2f}\n- R2 Score: {r2:.2f}")
-
-# Create interactive plot
-fig = go.Figure()
-
-fig.add_trace(go.Scatter(
-    y=actual,
-    mode='lines',
-    name='Actual (scaled)',
-    line=dict(color='blue')
-))
-
-fig.add_trace(go.Scatter(
-    y=pred,
-    mode='lines',
-    name='Predicted',
-    line=dict(color='orange')
-))
-
-fig.update_layout(
-    title="📊 Predicted vs Actual Price",
-    xaxis_title="Time Step",
-    yaxis_title="Scaled Value",
-    hovermode="x unified",
-    template="plotly_dark"
-)
-
-st.plotly_chart(fig, use_container_width=True)
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.plot(actual, label="Actual (scaled)", color='blue')
+        ax.plot(pred, label="Predicted", color='orange')
+        ax.legend()
+        st.pyplot(fig)
