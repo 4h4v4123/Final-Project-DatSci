@@ -8,7 +8,7 @@ import tensorflow as tf
 # --- Load model and scaler ---
 @st.cache_resource
 def load_model_and_scaler():
-    model = tf.keras.models.load_model("untuned_lstm_model.keras")
+    model = tf.keras.models.load_model("untuned_lstm_model.h5")
     scaler = joblib.load("untuned_lstm_model_scaler.pkl")
     return model, scaler
 
