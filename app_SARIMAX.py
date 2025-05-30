@@ -78,23 +78,20 @@ fig.update_layout(title="N225 High Price Forecast", xaxis_title="Date", yaxis_ti
 st.plotly_chart(fig, use_container_width=True)
 
 # EXTRA VISUALS
-st.subheader("📊 Market Trend Analysis")
-col1, col2 = st.columns(2)
+st.subheader("📊 30-day Moving Average of High Prices")
+ma30 = df["High"].rolling(window=30).mean()
+fig_ma = go.Figure()
+fig_ma.add_trace(go.Scatter(x=df.index, y=df["High"], mode="lines", name="High"))
+fig_ma.add_trace(go.Scatter(x=df.index, y=ma30, mode="lines", name="30-Day MA"))
+fig_ma.update_layout(template="plotly_white")
+st.plotly_chart(fig_ma, use_container_width=True)
 
-with col1:
-    st.markdown("**30-day Moving Average of High Prices**")
-    ma30 = df["High"].rolling(window=30).mean()
-    fig_ma = go.Figure()
-    fig_ma.add_trace(go.Scatter(x=df.index, y=df["High"], mode="lines", name="High"))
-    fig_ma.add_trace(go.Scatter(x=df.index, y=ma30, mode="lines", name="30-Day MA"))
-    fig_ma.update_layout(template="plotly_white")
-    st.plotly_chart(fig_ma, use_container_width=True)
-
-with col2:
-    st.markdown("**Correlation Heatmap**")
-    fig_corr, ax = plt.subplots(figsize=(6, 4))
-    sns.heatmap(df[["Open", "High", "Low", "Close", "Volume"]].corr(), annot=True, cmap="coolwarm", ax=ax)
-    st.pyplot(fig_corr)
+# CORRELATION HEATMAP
+st.subheader("🔍 Correlation Heatmap")
+correlation_matrix = df.corr()
+fig_heatmap = plt.figure(figsize=(10, 6))
+sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f", square=True, cbar_kws={"shrink": .8})
+st.pyplot(fig_heatmap, use_container_width=True)
 
 # CSV DOWNLOAD
 csv = forecast_df.to_csv(index=False).encode()
