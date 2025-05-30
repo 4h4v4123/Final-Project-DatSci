@@ -53,42 +53,38 @@ if st.sidebar.button("Predict Next Day Value"):
     ax.legend()
     st.pyplot(fig)
 
-# --- Upload CSV ---
-uploaded_file = st.file_uploader("Upload your market data CSV", type=["csv"])
+df = pd.read_csv('Market_cleaned_NYA.csv')
+st.subheader("📋 Preview of Uploaded Data")
+st.write(df.head())
+st.write(df.tail())
 
-if uploaded_file:
-    df = pd.read_csv(uploaded_file)
-    st.subheader("📋 Preview of Uploaded Data")
-    st.write(df.head())
-    st.write(df.tail())
+# --- Select and scale features ---
+features = ['Open', 'High', 'Low', 'Adj Close', 'Volume']
+if not all(col in df.columns for col in features):
+    st.error(f"CSV must include these columns: {features}")
+else:
+    df_features = df[features]
+    scaled_data = scaler.transform(df_features)
 
-    # --- Select and scale features ---
-    features = ['Open', 'High', 'Low', 'Adj Close', 'Volume']
-    if not all(col in df.columns for col in features):
-        st.error(f"CSV must include these columns: {features}")
-    else:
-        df_features = df[features]
-        scaled_data = scaler.transform(df_features)
+# --- Create sequences ---
+sequence_length = 60
+X = []
+for i in range(sequence_length, len(scaled_data)):
+    X.append(scaled_data[i - sequence_length:i])
+X = np.array(X)
+    
+st.success(f"✅ Created {X.shape[0]} sequences for prediction.")
 
-        # --- Create sequences ---
-        sequence_length = 60
-        X = []
-        for i in range(sequence_length, len(scaled_data)):
-            X.append(scaled_data[i - sequence_length:i])
-        X = np.array(X)
+# --- Make predictions ---
+predictions = model.predict(X)
 
-        st.success(f"✅ Created {X.shape[0]} sequences for prediction.")
+# --- Visualize predictions ---
+st.subheader("📊 Predicted vs Actual Price")
+actual = scaled_data[sequence_length:, 3]  # Actual 'Adj Close' column after seq offset
+pred = predictions.flatten()
 
-        # --- Make predictions ---
-        predictions = model.predict(X)
-
-        # --- Visualize predictions ---
-        st.subheader("📊 Predicted vs Actual Price")
-        actual = scaled_data[sequence_length:, 3]  # Actual 'Adj Close' column after seq offset
-        pred = predictions.flatten()
-
-        fig, ax = plt.subplots(figsize=(10, 4))
-        ax.plot(actual, label="Actual (scaled)", color='blue')
-        ax.plot(pred, label="Predicted", color='orange')
-        ax.legend()
-        st.pyplot(fig)
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.plot(actual, label="Actual (scaled)", color='blue')
+ax.plot(pred, label="Predicted", color='orange')
+ax.legend()
+st.pyplot(fig)
