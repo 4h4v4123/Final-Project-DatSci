@@ -8,8 +8,8 @@ import tensorflow as tf
 # --- Load model and scaler ---
 @st.cache_resource
 def load_model_and_scaler():
-    model = tf.keras.models.load_model("C:/Users/Administrator/PycharmProjects/Final Project/untuned_lstm_model.keras")
-    scaler = joblib.load("C:/Users/Administrator/PycharmProjects/Final Project/untuned_lstm_model_scaler.pkl")
+    model = tf.keras.models.load_model("untuned_lstm_model.keras")
+    scaler = joblib.load("untuned_lstm_model_scaler.pkl")
     return model, scaler
 
 model, scaler = load_model_and_scaler()
@@ -57,7 +57,7 @@ if st.sidebar.button("Predict Next Day Value"):
 uploaded_file = st.file_uploader("Upload your market data CSV", type=["csv"])
 
 if uploaded_file:
-    df = pd.read_csv(uploaded_file)
+    df = pd.read_csv('Market_cleaned_NYA')
     st.subheader("📋 Preview of Uploaded Data")
     st.write(df.head())
     st.write(df.tail())
