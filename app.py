@@ -83,7 +83,7 @@ if uploaded_file:
         predictions = model.predict(X)
 
         # --- Visualize predictions ---
-        st.subheader("📊 Predicted vs Actual (Adj Close)")
+        st.subheader("📊 Predicted vs Actual Price")
         actual = scaled_data[sequence_length:, 3]  # Actual 'Adj Close' column after seq offset
         pred = predictions.flatten()
 
