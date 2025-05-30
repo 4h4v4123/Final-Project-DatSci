@@ -53,7 +53,7 @@ if st.sidebar.button("Predict Next Day Value"):
     ax.legend()
     st.pyplot(fig)
 
-df = pd.read_csv('Market_cleaned_NYA')
+df = pd.read_csv('Market_cleaned_NYA.csv')
 st.subheader("📋 Preview of Uploaded Data")
 st.write(df.head())
 st.write(df.tail())
