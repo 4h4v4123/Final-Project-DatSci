@@ -75,16 +75,67 @@ X = np.array(X)
     
 st.success(f"✅ Created {X.shape[0]} sequences for prediction.")
 
+# Manual Input Prediction Plot (after st.success() on prediction)
+fig2 = go.Figure()
+
+# User input points
+fig2.add_trace(go.Scatter(
+    x=list(range(1,6)),
+    y=user_input_np[:, output_options.index(selected_output)],
+    mode='lines+markers',
+    name='Input History'
+))
+
+# Predicted point
+fig2.add_trace(go.Scatter(
+    x=[6],
+    y=[prediction[0][0]],
+    mode='markers',
+    marker=dict(size=12, color='red'),
+    name='Predicted Next Value'
+))
+
+fig2.update_layout(
+    title=f"📊 {selected_output} - Last 5 Days & Prediction",
+    xaxis_title="Day",
+    yaxis_title=selected_output,
+    template="plotly_dark"
+)
+
+st.plotly_chart(fig2, use_container_width=True)
+
 # --- Make predictions ---
 predictions = model.predict(X)
 
-# --- Visualize predictions ---
-st.subheader("📊 Predicted vs Actual Price")
-actual = scaled_data[sequence_length:, 3]  # Actual 'Adj Close' column after seq offset
+import plotly.graph_objs as go
+
+# Get actual and predicted values (scale back if needed)
+actual = scaled_data[sequence_length:, 3] 
 pred = predictions.flatten()
 
-fig, ax = plt.subplots(figsize=(10, 4))
-ax.plot(actual, label="Actual (scaled)", color='blue')
-ax.plot(pred, label="Predicted", color='orange')
-ax.legend()
-st.pyplot(fig)
+# Create interactive plot
+fig = go.Figure()
+
+fig.add_trace(go.Scatter(
+    y=actual,
+    mode='lines',
+    name='Actual (scaled)',
+    line=dict(color='blue')
+))
+
+fig.add_trace(go.Scatter(
+    y=pred,
+    mode='lines',
+    name='Predicted',
+    line=dict(color='orange')
+))
+
+fig.update_layout(
+    title="📊 Predicted vs Actual Price",
+    xaxis_title="Time Step",
+    yaxis_title="Scaled Value",
+    hovermode="x unified",
+    template="plotly_dark"
+)
+
+st.plotly_chart(fig, use_container_width=True)
