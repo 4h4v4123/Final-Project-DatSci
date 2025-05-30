@@ -14,6 +14,13 @@ def load_model_and_scaler():
 
 model, scaler = load_model_and_scaler()
 
+st.markdown("### 🚀 Forecast Dashboard")
+
+col1, col2, col3 = st.columns(3)
+col1.metric("MAE", f"{mae:.4f}")
+col2.metric("RMSE", f"{rmse:.4f}")
+col3.metric("Forecast Horizon", f"{forecast_horizon} days")
+
 # --- Streamlit UI --- #
 st.title("📈 Market Data LSTM Forecasting")
 st.write("Upload market data (CSV) to forecast using a pre-trained LSTM model.")
@@ -21,6 +28,10 @@ st.write("Upload market data (CSV) to forecast using a pre-trained LSTM model.")
 # --- Sidebar UI ---
 features = ['Open', 'High', 'Low', 'Adj Close', 'Volume']
 output_options = ['Adj Close', 'Close', 'Open', 'High', 'Low', 'Volume']
+
+if st.sidebar.checkbox("🧠 Show Model Info"):
+    st.subheader("Model Architecture")
+    model.summary(print_fn=lambda x: st.text(x))
 
 # --- Sidebar for manual input ---
 st.sidebar.header("🔢 Manual Input for Prediction")
@@ -52,6 +63,7 @@ if st.sidebar.button("Predict Next Day Value"):
     ax.set_title(f"{selected_output} - Last 60 Days & Prediction")
     ax.legend()
     st.pyplot(fig)
+
 
 df = pd.read_csv('Market_cleaned_NYA.csv')
 st.subheader("📋 Preview of Uploaded Data")
@@ -112,6 +124,17 @@ import plotly.graph_objs as go
 # Get actual and predicted values (scale back if needed)
 actual = scaled_data[sequence_length:, 3] 
 pred = predictions.flatten()
+
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+# Inverse transform predictions and actuals if necessary (depends on your model setup)
+# Assuming they are scaled, so let's just use them directly here
+mae = mean_absolute_error(actual, pred)
+rmse = np.sqrt(mean_squared_error(actual, pred))
+mape = np.mean(np.abs((actual - pred) / actual)) * 100
+r2 = r2_score(actual, pred) * 100
+
+st.info(f"📊 **Model Evaluation Metrics:**\n- MAE: {mae:.4f}\n- RMSE: {rmse:.4f}\n- MAPE: {mape:.2f}\n- R2 Score: {r2:.2f}")
 
 # Create interactive plot
 fig = go.Figure()
